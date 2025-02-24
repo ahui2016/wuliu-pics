@@ -4,7 +4,7 @@
 
 主要功能： 1.检查文件损坏 2.备份
 
-暂时不支持其他功能，但 json 仍采用与 wuliu-j 相同的 simplemeta 结构。
+不採用 simplemeta, 只記錄 checksum, checked, damaged
 
 
 ## 注意
@@ -12,9 +12,8 @@
 - 圖片與 json 的檔案名稱一一對應，例如 `abc.jpg` 對應 `abc.jpg.json`
 - 建議使用 WuliuPicsRename 更改圖片檔案名稱，以便自動更改 json 檔案名稱
 - 如果手動更改檔案名稱，請記得同時更改對應的 json 檔案名稱
-- 如果 json 檔案找不到對應的圖片檔案，會被刪除
+- 如果 json 檔案找不到對應的圖片檔案，會被刪除 (使用 WuliuPicsOrphan)
 - 如果圖片檔案找不到對應的 json 檔案，則自動創建 json 檔案
-- 請勿手動修改 json 檔案的內容
 
 
 ## Java Commands
@@ -40,4 +39,8 @@
 - 小技巧: Ctrl+Shift+C 複製檔案路徑
 - 簡單的窗口
 
+## TODO
+
+- 不要數據庫？
+  - 不採用 simplemeta, 只記錄 checksum, checked, damaged
 
