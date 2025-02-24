@@ -2,6 +2,7 @@ package wuliu_pics.common;
 
 import com.fasterxml.jackson.jr.ob.JSON;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,10 +13,12 @@ import java.util.List;
 public class MyUtil {
     public static final String RepoURL = "https://github.com/ahui2016/wuliu-pics";
     public static final String PROJECT_JSON = "project.json";
-    public static final String WULIU_PICS_DB = "wuliu_pics.db";
+    public static final String ALBUMS = "albums";
 
     public static final Path PROJ_INFO_PATH = Path.of(PROJECT_JSON);
     public static final Path ALBUMS_PATH = Path.of("albums");
+
+    public static final Font FONT_20 = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
 
     /**
      * 確保 folder 存在, 如果不存在或有同名檔案, 則拋出異常。
@@ -78,5 +81,13 @@ public class MyUtil {
             return list;
         }
         throw new RuntimeException(String.format("%s is not a string list", key));
+    }
+
+    public static List<Path> getAlbums(Path projRoot) {
+        try (var files = Files.list(projRoot.resolve(ALBUMS))) {
+            return files.filter(Files::isDirectory).toList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
