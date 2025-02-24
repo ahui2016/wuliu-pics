@@ -83,8 +83,8 @@ public class MyUtil {
         throw new RuntimeException(String.format("%s is not a string list", key));
     }
 
-    public static List<Path> getAlbums(Path projRoot) {
-        try (var files = Files.list(projRoot.resolve(ALBUMS))) {
+    public static List<Path> getAlbums(Path albumsPath) {
+        try (var files = Files.list(albumsPath)) {
             return files.filter(Files::isDirectory).toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
