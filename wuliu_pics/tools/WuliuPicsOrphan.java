@@ -20,19 +20,19 @@ import java.util.HashSet;
 
 public class WuliuPicsOrphan implements Runnable{
     static ProjectInfo projInfo;
+    static Path projRoot;
 
-    private Path projRoot;
     private List<Path> albums;
     private Orphans allOrphans;
 
     private JFrame frame;
-    private JList<String> projList;
     private JTextField currentProjTF;
     private JTextArea msgArea;
     private JButton checkBtn;
     private JButton fixBtn;
 
     public static void main(String[] args) throws IOException {
+        projRoot = Path.of("").toAbsolutePath();
         projInfo = ProjectInfo.fromJsonFile(MyUtil.PROJ_INFO_PATH);
         SwingUtilities.invokeLater(new WuliuPicsOrphan());
     }
@@ -40,14 +40,13 @@ public class WuliuPicsOrphan implements Runnable{
     @Override
     public void run() {
         createGUI();
-        projList.setListData(projInfo.projects.toArray(new String[0]));
-        projList.addMouseListener(new DoubleClickAdapter());
+        initCheck();
         checkBtn.addActionListener(new CheckBtnListener());
         fixBtn.addActionListener(new FixBtnListener());
     }
 
     private void createGUI() {
-        List.of("OptionPane.messageFont", "TextField.font", "List.font",
+        List.of("OptionPane.messageFont", "TextField.font",
                 "Label.font", "TextArea.font", "Button.font"
         ).forEach(k -> UIManager.put(k, MyUtil.FONT_20));
 
@@ -57,14 +56,10 @@ public class WuliuPicsOrphan implements Runnable{
 
         pane0.add(new JLabel("WuliuPicsOrphan: 尋找孤立的圖片或JSON檔案"));
         pane0.add(Box.createRigidArea(new Dimension(800, 5)));
-        pane0.add(new JLabel("請選擇專案(按兩下):"));
-        projList = new JList<>();
-        projList.setFixedCellWidth(850);
-        pane0.add(projList);
 
-        currentProjTF = new JTextField(45);
+        currentProjTF = new JTextField(47);
         currentProjTF.setEditable(false);
-        pane0.add(new JLabel("已選擇專案:"));
+        pane0.add(new JLabel("當前專案:"));
         pane0.add(currentProjTF);
 
         msgArea = new JTextArea();
@@ -73,7 +68,7 @@ public class WuliuPicsOrphan implements Runnable{
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         pane0.add(Box.createRigidArea(new Dimension(800, 5)));
-        scrollArea.setPreferredSize(new Dimension(850, 400));
+        scrollArea.setPreferredSize(new Dimension(850, 500));
         pane0.add(scrollArea);
 
         checkBtn = new JButton("Check");
@@ -92,27 +87,17 @@ public class WuliuPicsOrphan implements Runnable{
         frame.setVisible(true);
     }
 
-    class DoubleClickAdapter extends MouseAdapter {
-        @Override
-        public void mouseClicked(MouseEvent event) {
-            if (event.getClickCount() == 2) {
-                checkBtn.setEnabled(false);
-                fixBtn.setEnabled(false);
-                msgArea.setText("");
-                int i = projList.locationToIndex(event.getPoint());
-                projRoot = Path.of(projInfo.projects.get(i)).toAbsolutePath().normalize();
-                currentProjTF.setText(projRoot.toString());
-                try {
-                    var albumsPath = projRoot.resolve(MyUtil.ALBUMS);
-                    albums = MyUtil.getAlbums(albumsPath);
-                    msgArea.append("Albums in %s%n".formatted(albumsPath));
-                    msgArea.append("發現 %d 個相冊。\n".formatted(albums.size()));
-                    if (albums.isEmpty()) return;
-                    checkAlbums(albumsPath);
-                } catch (Exception e) {
-                    msgArea.append(e.toString());
-                }
-            }
+    private void initCheck() {
+        currentProjTF.setText(projRoot.toString());
+        try {
+            var currentProjInfo = ProjectInfo.fromJsonFile(projRoot.resolve(MyUtil.PROJECT_JSON));
+            MyUtil.checkNotBackup(currentProjInfo);
+            albums = MyUtil.getAlbums(MyUtil.ALBUMS_PATH);
+            msgArea.append("發現 %d 個相冊。\n".formatted(albums.size()));
+            if (albums.isEmpty()) return;
+            checkAlbums(MyUtil.ALBUMS_PATH);
+        } catch (Exception e) {
+            msgArea.append(e.toString());
         }
     }
 

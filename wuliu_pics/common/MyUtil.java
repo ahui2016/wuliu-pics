@@ -27,6 +27,12 @@ public class MyUtil {
         return LocalDateTime.now().format(RFC3339);
     }
 
+    public static void checkNotBackup(ProjectInfo info) {
+        if (info.isBackup) {
+            throw new RuntimeException("這是備份專案, 不可使用該功能");
+        }
+    }
+
     /**
      * 確保 folder 存在, 如果不存在或有同名檔案, 則拋出異常。
      * 如果 folder 存在則無事發生。
