@@ -6,12 +6,15 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.io.File;
 import java.util.List;
 
 public class MyUtil {
     public static final String RepoURL = "https://github.com/ahui2016/wuliu-pics";
+    public static final DateTimeFormatter RFC3339 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String PROJECT_JSON = "project.json";
     public static final String ALBUMS = "albums";
 
@@ -19,6 +22,10 @@ public class MyUtil {
     public static final Path ALBUMS_PATH = Path.of("albums");
 
     public static final Font FONT_20 = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
+
+    public static String timeNowRFC3339() {
+        return LocalDateTime.now().format(RFC3339);
+    }
 
     /**
      * 確保 folder 存在, 如果不存在或有同名檔案, 則拋出異常。

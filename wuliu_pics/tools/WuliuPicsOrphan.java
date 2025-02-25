@@ -1,5 +1,6 @@
 package wuliu_pics.tools;
 
+import wuliu_pics.common.Metadata;
 import wuliu_pics.common.MyUtil;
 import wuliu_pics.common.ProjectInfo;
 
@@ -42,6 +43,7 @@ public class WuliuPicsOrphan implements Runnable{
         projList.setListData(projInfo.projects.toArray(new String[0]));
         projList.addMouseListener(new DoubleClickAdapter());
         checkBtn.addActionListener(new CheckBtnListener());
+        fixBtn.addActionListener(new FixBtnListener());
     }
 
     private void createGUI() {
@@ -81,7 +83,7 @@ public class WuliuPicsOrphan implements Runnable{
 
         fixBtn = new JButton("Fix");
         fixBtn.setEnabled(false);
-        pane0.add(Box.createRigidArea(new Dimension(500, 2)));
+        // pane0.add(Box.createRigidArea(new Dimension(500, 2)));
         pane0.add(fixBtn);
 
         frame.add(BorderLayout.CENTER, pane0);
@@ -108,9 +110,52 @@ public class WuliuPicsOrphan implements Runnable{
                     if (albums.isEmpty()) return;
                     checkAlbums(albumsPath);
                 } catch (Exception e) {
-                    msgArea.append(e.getMessage());
+                    msgArea.append(e.toString());
                 }
             }
+        }
+    }
+
+    class FixBtnListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            fixBtn.setEnabled(false);
+            deleteJsonOrphans(allOrphans.metas());
+            try {
+                createMetas(allOrphans.files());
+            } catch (Exception ex) {
+                msgArea.append(ex + "\n");
+                JOptionPane.showMessageDialog(frame, "出錯！");
+            }
+        }
+
+        private void deleteJsonOrphans(List<String> jsonOrphans) {
+            if (jsonOrphans.isEmpty()) {
+                return;
+            }
+            msgArea.setText("正在刪除孤立的 json 檔案\n");
+            for (var orphan : jsonOrphans) {
+                try {
+                    Files.deleteIfExists(Path.of(orphan));
+                } catch (Exception ex) {
+                    msgArea.append(ex + "\n");
+                }
+                msgArea.append(".");
+            }
+            msgArea.append("\n");
+        }
+
+        private void createMetas(List<String> picOrphans) throws IOException {
+            if (picOrphans.isEmpty()) {
+                return;
+            }
+            msgArea.setText("正在生成所需的 json 檔案\n");
+            for (var orphan : picOrphans) {
+                var meta = new Metadata(Path.of(orphan));
+                meta.writeToJson(Path.of(orphan+".json").toFile());
+                msgArea.append(".");
+            }
+            msgArea.append("\n");
         }
     }
 
@@ -144,7 +189,7 @@ public class WuliuPicsOrphan implements Runnable{
                 return;
             }
         } catch (Exception e) {
-            msgArea.append(e.getMessage());
+            msgArea.append(e.toString());
             return;
         }
         for (var album : albums) {
@@ -157,7 +202,7 @@ public class WuliuPicsOrphan implements Runnable{
                     return;
                 }
             } catch (Exception e) {
-                msgArea.append(e.getMessage());
+                msgArea.append(e.toString());
                 return;
             }
         }
@@ -191,18 +236,20 @@ public class WuliuPicsOrphan implements Runnable{
                 }
             });
         } catch (Exception e) {
-            msgArea.append(e.getMessage());
+            msgArea.append(e.toString());
             return null;
         }
+
+        var metaOrphans = inFirstListOnly(metas, pics_json);
         var pics_json_orphans = inFirstListOnly(pics_json, metas);
         var picsOrphans = pics_json_orphans.stream().map(filename ->
                 filename.substring(0, filename.length() - ".json".length())).toList();
-        var metaOrphans = inFirstListOnly(metas, pics_json);
         return new Orphans(picsOrphans, new ArrayList<>(metaOrphans));
     }
 
     private Set<String> inFirstListOnly(Set<String> firstSet, Set<String> otherSet) {
-        firstSet.removeAll(otherSet);
+        firstSet = new HashSet<>(firstSet);
+        firstSet.removeAll(otherSet); // firstSet 自身改變，因此在此之前需要複製。
         return firstSet;
     }
 
@@ -218,12 +265,14 @@ record Orphans(List<String> files, List<String> metas) {
         if (!files.isEmpty()) {
             str += "以下圖片檔案缺少對應的 json 檔案:\n";
             str += String.join("\n", files);
+            str += "\n";
         }
         if (!metas.isEmpty()) {
-            str += "\n以下 json 檔案沒有對應的圖片檔案:\n";
+            str += "以下 json 檔案沒有對應的圖片檔案:\n";
             str += String.join("\n", metas);
+            str += "\n";
         }
-        return str + "\n";
+        return str;
     }
 
     public int sum() {
