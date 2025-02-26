@@ -2,7 +2,6 @@ package wuliu_pics.common;
 
 import com.fasterxml.jackson.jr.ob.JSON;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +19,6 @@ public class MyUtil {
 
     public static final Path PROJ_INFO_PATH = Path.of(PROJECT_JSON);
     public static final Path ALBUMS_PATH = Path.of("albums");
-
-    public static final Font FONT_20 = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
 
     public static String timeNowRFC3339() {
         return LocalDateTime.now().format(RFC3339);

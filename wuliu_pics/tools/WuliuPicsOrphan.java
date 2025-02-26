@@ -2,14 +2,13 @@ package wuliu_pics.tools;
 
 import wuliu_pics.common.Metadata;
 import wuliu_pics.common.MyUtil;
+import wuliu_pics.common.MyUtilGUI;
 import wuliu_pics.common.ProjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,14 +47,14 @@ public class WuliuPicsOrphan implements Runnable{
     private void createGUI() {
         List.of("OptionPane.messageFont", "TextField.font",
                 "Label.font", "TextArea.font", "Button.font"
-        ).forEach(k -> UIManager.put(k, MyUtil.FONT_20));
+        ).forEach(k -> UIManager.put(k, MyUtilGUI.FONT_20));
 
         frame = new JFrame("Wuliu Pics Orphan");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         var pane0 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         pane0.add(new JLabel("WuliuPicsOrphan: 尋找孤立的圖片或JSON檔案"));
-        pane0.add(Box.createRigidArea(new Dimension(800, 5)));
+        pane0.add(MyUtilGUI.spacer(800, 5));
 
         currentProjTF = new JTextField(47);
         currentProjTF.setEditable(false);
@@ -64,21 +63,18 @@ public class WuliuPicsOrphan implements Runnable{
 
         msgArea = new JTextArea();
         msgArea.setLineWrap(true);
-        var scrollArea = new JScrollPane(msgArea,
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        pane0.add(Box.createRigidArea(new Dimension(800, 5)));
-        scrollArea.setPreferredSize(new Dimension(850, 500));
+        var scrollArea = MyUtilGUI.verticalScrollPane(msgArea, 850, 500);
+        pane0.add(MyUtilGUI.spacer(800, 5));
         pane0.add(scrollArea);
 
         checkBtn = new JButton("Check");
         checkBtn.setEnabled(false);
-        pane0.add(Box.createRigidArea(new Dimension(800, 2)));
+        pane0.add(MyUtilGUI.spacer(800, 2));
         pane0.add(checkBtn);
 
         fixBtn = new JButton("Fix");
         fixBtn.setEnabled(false);
-        // pane0.add(Box.createRigidArea(new Dimension(500, 2)));
+        // pane0.add(spacer(500, 2));
         pane0.add(fixBtn);
 
         frame.add(BorderLayout.CENTER, pane0);
@@ -90,12 +86,11 @@ public class WuliuPicsOrphan implements Runnable{
     private void initCheck() {
         currentProjTF.setText(projRoot.toString());
         try {
-            var currentProjInfo = ProjectInfo.fromJsonFile(projRoot.resolve(MyUtil.PROJECT_JSON));
-            MyUtil.checkNotBackup(currentProjInfo);
+            MyUtil.checkNotBackup(projInfo);
             albums = MyUtil.getAlbums(MyUtil.ALBUMS_PATH);
             msgArea.append("發現 %d 個相冊。\n".formatted(albums.size()));
             if (albums.isEmpty()) return;
-            checkAlbums(MyUtil.ALBUMS_PATH);
+            checkAlbums();
         } catch (Exception e) {
             msgArea.append(e.toString());
         }
@@ -112,6 +107,7 @@ public class WuliuPicsOrphan implements Runnable{
                 msgArea.append(ex + "\n");
                 JOptionPane.showMessageDialog(frame, "出錯！");
             }
+            msgArea.append("\n完成。\n");
         }
 
         private void deleteJsonOrphans(List<String> jsonOrphans) {
@@ -162,8 +158,8 @@ public class WuliuPicsOrphan implements Runnable{
         }
     }
 
-    private void checkAlbums(Path albumsPath) {
-        try (var files = Files.list(albumsPath)) {
+    private void checkAlbums() {
+        try (var files = Files.list(MyUtil.ALBUMS_PATH)) {
             var orphans = files.filter(Files::isRegularFile).toList();
             if (!orphans.isEmpty()) {
                 msgArea.append("在 albums 的第一層子目錄中不允許出現普通檔案（非資料夾）：\n");

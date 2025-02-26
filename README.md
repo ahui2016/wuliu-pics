@@ -7,6 +7,11 @@
 不採用 simplemeta, 只記錄 checksum, checked, damaged
 
 
+## 设计
+
+json 档案与图片在同一资料夹内，方便移动图片。
+
+
 ## 注意
 
 - 圖片與 json 的檔案名稱一一對應，例如 `abc.jpg` 對應 `abc.jpg.json`
@@ -14,6 +19,10 @@
 - 如果手動更改檔案名稱，請記得同時更改對應的 json 檔案名稱
 - 如果 json 檔案找不到對應的圖片檔案，會被刪除 (使用 WuliuPicsOrphan)
 - 如果圖片檔案找不到對應的 json 檔案，則自動創建 json 檔案
+- 禁止替換檔案
+
+**特別注意**: 禁止替換檔案。  
+需要替換檔案時，請先刪除（與同名 json 檔案一起刪除），然後再添加。
 
 
 ## Java Commands

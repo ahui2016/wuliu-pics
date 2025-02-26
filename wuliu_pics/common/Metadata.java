@@ -14,10 +14,12 @@ import java.util.Map;
 public class Metadata {
     public String checksum; // SHA-1
     public String checked;  // RFC3339
+    public long size;
     public boolean damaged;
 
     private static final String CHECKSUM = "checksum";
     private static final String CHECKED = "checked";
+    private static final String SIZE = "size";
     private static final String DAMAGED = "damaged";
 
     public Metadata() {
@@ -27,6 +29,7 @@ public class Metadata {
     public Metadata(Path file) {
         checksum = getFileSHA1(file);
         checked = MyUtil.timeNowRFC3339();
+        size = file.toFile().length();
         damaged = false;
     }
 
@@ -43,6 +46,7 @@ public class Metadata {
     public Metadata readFromMap(Map<String,Object> data) {
         checksum = (String) data.get(CHECKSUM);
         checked = (String) data.get(CHECKED);
+        size = (long) data.get(SIZE);
         damaged = (boolean) data.get(DAMAGED);
         return this;
     }
@@ -51,6 +55,7 @@ public class Metadata {
         LinkedHashMap<String,Object> map = new LinkedHashMap<>();
         map.putLast(CHECKSUM, checksum);
         map.putLast(CHECKED, checked);
+        map.putLast(SIZE, size);
         map.putLast(DAMAGED, damaged);
         return map;
     }
