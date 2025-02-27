@@ -5,6 +5,7 @@ import com.fasterxml.jackson.jr.ob.JSON;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -99,5 +100,21 @@ public class MyUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String fileSizeToString(double size) {
+        long BYTE = 1L;
+        long KB = BYTE << 10;
+        long MB = KB << 10;
+        long GB = MB << 10;
+        if (size <= 0) return "0";
+        if (size >= GB) return formatSize(size, GB, "GB");
+        if (size >= MB) return formatSize(size, MB, "MB");
+        return formatSize(size, KB, "KB");
+    }
+
+    private static String formatSize(double size, long divider, String unitName) {
+        var formater = new DecimalFormat("#.##");
+        return formater.format(size / divider) + " " + unitName;
     }
 }

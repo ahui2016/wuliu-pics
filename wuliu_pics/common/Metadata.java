@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Metadata {
@@ -46,7 +47,7 @@ public class Metadata {
     public Metadata readFromMap(Map<String,Object> data) {
         checksum = (String) data.get(CHECKSUM);
         checked = (String) data.get(CHECKED);
-        size = (long) data.get(SIZE);
+        size = getLongFromMap(data, SIZE);
         damaged = (boolean) data.get(DAMAGED);
         return this;
     }
@@ -75,4 +76,23 @@ public class Metadata {
         }
     }
 
+    public static Long getLongFromMap(Map<String,Object> map, String key) {
+        Number n = (Number) map.get(key);
+        return n.longValue();
+    }
+
+    public static Integer getIntFromMap(Map<String,Object> map, String key) {
+        Number n = (Number) map.get(key);
+        return n.intValue();
+    }
+
+    public static List<String> getStrListFromMap(Map<String,Object> data, String key) {
+        Object obj = data.get(key);
+        if (obj instanceof List<?>) {
+            @SuppressWarnings("unchecked")
+            var list = (List<String>) obj;
+            return list;
+        }
+        throw new RuntimeException(String.format("%s is not a string list", key));
+    }
 }
